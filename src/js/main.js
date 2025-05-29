@@ -21,8 +21,8 @@ const VERSION = "1.0";
       position: "center",
       resizable: true,
       icon: "./icon.png",
-      show: true,
-      focus: true,
+      show: false,
+      focus: false,
     },
   };
 
@@ -100,7 +100,8 @@ const VERSION = "1.0";
         new nw.MenuItem({
           label: "弹窗通知",
           type: "checkbox",
-          checked: localStorage.getItem("allowNotification", "granted") === "granted",
+          checked:
+            localStorage.getItem("allowNotification", "granted") === "granted",
           click: function () {
             toggleNotificationInMainWindow(this.checked);
           },
@@ -123,20 +124,21 @@ const VERSION = "1.0";
         autoStartMenuItem.checked = enabled;
       });
 
+      // Start minimized toggle menu item
+      const startMinimizedMenuItem = new nw.MenuItem({
+        label: "启动时最小化",
+        type: "checkbox",
+        checked: getStartMinimizedSetting(),
+        click: function () {
+          setStartMinimizedSetting(this.check);
+        },
+      });
+      menu.append(startMinimizedMenuItem);
+
       // Separator
       menu.append(
         new nw.MenuItem({
           type: "separator",
-        })
-      );
-
-      // Show/Hide main window menu item
-      menu.append(
-        new nw.MenuItem({
-          label: "显示/隐藏",
-          click: function () {
-            toggleMainWindow();
-          },
         })
       );
 
@@ -179,7 +181,10 @@ const VERSION = "1.0";
 
       // Handle tray click (show/hide main window)
       tray.on("click", function () {
-        toggleMainWindow();
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        }
       });
 
       console.log("[Main] System tray initialized successfully");
@@ -193,18 +198,30 @@ const VERSION = "1.0";
   // Open main application window
   function openMainWindow() {
     try {
-      // Open the main application window
-      nw.Window.open(
-        APP_CONFIG.remoteUrl,
-        APP_CONFIG.windowOptions,
-        function (win) {
-          mainWindow = win;
+      // Check if start minimized setting is enabled
+      const startMinimized = getStartMinimizedSetting();
 
-          // Handle window events
-          setupMainWindowEvents(win);
-          console.log("[Main] Main application window opened successfully");
+      // Create window options based on start minimized setting
+      const windowOptions = { ...APP_CONFIG.windowOptions };
+      if (!startMinimized) {
+        // Show window if not starting minimized
+        windowOptions.show = true;
+        windowOptions.focus = true;
+      }
+
+      // Open the main application window
+      nw.Window.open(APP_CONFIG.remoteUrl, windowOptions, function (win) {
+        mainWindow = win;
+
+        // Handle window events
+        setupMainWindowEvents(win);
+
+        if (startMinimized) {
+          console.log("[Main] Main application window opened minimized");
+        } else {
+          console.log("[Main] Main application window opened normally");
         }
-      );
+      });
 
       return true;
     } catch (error) {
@@ -241,31 +258,6 @@ const VERSION = "1.0";
     win.on("blur", function () {
       console.log("[Main] Main window blurred");
     });
-  }
-
-  // Toggle main window visibility
-  function toggleMainWindow() {
-    try {
-      // Check if window is currently visible
-      if (
-        mainWindow.window &&
-        mainWindow.window.document.visibilityState === "visible"
-      ) {
-        // Window is visible, hide it
-        mainWindow.hide();
-        console.log("[Main] Main window hidden");
-      } else {
-        // Window is hidden, show it
-        mainWindow.show();
-        mainWindow.focus();
-        console.log("[Main] Main window shown and focused");
-      }
-    } catch (error) {
-      // Fallback: just show the window
-      console.log("[Main] Error checking window state, showing window:", error);
-      mainWindow.show();
-      mainWindow.focus();
-    }
   }
 
   // Reload main window
@@ -377,6 +369,27 @@ const VERSION = "1.0";
     if (success) {
       // Update menu item state
       menuItem.checked = !currentState;
+    }
+  }
+
+  // Start minimized related functions
+  function getStartMinimizedSetting() {
+    try {
+      return localStorage.getItem("startMinimized");
+    } catch (error) {
+      console.error("[Main] Failed to get start minimized setting:", error);
+      return false;
+    }
+  }
+
+  function setStartMinimizedSetting(enabled) {
+    try {
+      localStorage.setItem("startMinimized", enabled);
+      console.log("[Main] Start minimized setting updated:", enabled);
+      return true;
+    } catch (error) {
+      console.error("[Main] Failed to set start minimized setting:", error);
+      return false;
     }
   }
 

@@ -49,6 +49,12 @@
           notificationCallback = listener;
         }
       },
+      removeEventListener(type, listener) {
+        if (type === "change") {
+          console.log("Notification listener removed");
+          notificationCallback = null;
+        }
+      },
     };
 
     const permissionRequest = Notification.requestPermission;
@@ -156,7 +162,11 @@
           display: none !important;
         }
         main {
-          height: calc(100svh + 5rem) !important;
+          height: calc(100svh + 5rem);
+        }
+        #login {
+          padding-top: 8rem !important;
+          height: calc(100svh - 3.25rem) !important;
         }
       `;
       document.head.appendChild(style);
