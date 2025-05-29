@@ -1,0 +1,31 @@
+{
+  "name": "twcn-admin-builder",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Build tools for TeeworldsCN Admin NW.js application",
+  "scripts": {
+    "build": "node build.js",
+    "build:clean": "node build.js --clean",
+    "build:dev": "node build.js --dev",
+    "build:dev:clean": "node build.js --dev --clean",
+    "run:dev": "npx nwb nwjs --src=./src --cache=./cache",
+    "test": "node build.js --dev && echo 'Build test completed successfully'"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.24",
+    "@types/nw.js": "^0.92.0",
+    "nw-builder": "^4.13.14"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "nwjs",
+    "desktop-app",
+    "teeworlds",
+    "admin",
+    "build-tools"
+  ],
+  "author": "TeeworldsCN",
+  "license": "MIT"
+}

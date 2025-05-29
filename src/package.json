@@ -1,0 +1,25 @@
+{
+  "main": "./js/main.js",
+  "name": "twcn-admin",
+  "product_string": "TeeworldsCN 管理系统",
+  "chromium-args": "--ozone-platform-hint=auto --enable-wayland-ime --disable-web-security",
+  "version": "1.0",
+  "node-remote": [
+    "http://localhost:5173",
+    "https://teeworlds.cn"
+  ],
+  "dom_storage_quota": 4095,
+  "window": {
+    "title": "TeeworldsCN 管理系统",
+    "width": 1152,
+    "height": 648,
+    "min_width": 364,
+    "min_height": 648,
+    "icon": "./icon.png",
+    "show": false
+  },
+  "inject_js_start": "./js/inject.js",
+  "dependencies": {
+    "auto-launch": "^5.0.6"
+  }
+}
