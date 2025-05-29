@@ -18,29 +18,39 @@ const VERSION = "1.0";
       height: 648,
       min_width: 364,
       min_height: 648,
+      position: "center",
+      resizable: true,
       icon: "./icon.png",
       show: true,
       focus: true,
     },
   };
 
-  const match = new chrome.declarativeWebRequest.RequestMatcher({
-    url: { hostSuffix: "", schemes: ["http"] },
-    stages: ["onBeforeSendHeaders"],
-  });
+  try {
+    if (chrome.declarativeWebRequest) {
+      const match = new chrome.declarativeWebRequest.RequestMatcher({
+        url: { hostSuffix: "", schemes: ["http"] },
+        stages: ["onBeforeSendHeaders"],
+      });
 
-  const action = new chrome.declarativeWebRequest.SetRequestHeader({
-    name: "origin",
-    value: new URL(APP_CONFIG.remoteUrl).origin,
-  });
+      const action = new chrome.declarativeWebRequest.SetRequestHeader({
+        name: "origin",
+        value: new URL(APP_CONFIG.remoteUrl).origin,
+      });
 
-  chrome.declarativeWebRequest.onRequest.addRules([
-    {
-      priority: 1000,
-      conditions: [match],
-      actions: [action],
-    },
-  ]);
+      chrome.declarativeWebRequest.onRequest.addRules([
+        {
+          priority: 1000,
+          conditions: [match],
+          actions: [action],
+        },
+      ]);
+    } else {
+      console.warn("[Main] declarativeWebRequest API is not available.");
+    }
+  } catch (error) {
+    console.error("[Main] Error setting up request header override:", error);
+  }
 
   // Global state
   let tray = null;
@@ -90,7 +100,7 @@ const VERSION = "1.0";
         new nw.MenuItem({
           label: "弹窗通知",
           type: "checkbox",
-          checked: localStorage.getItem("allowNotification") === "granted",
+          checked: localStorage.getItem("allowNotification", "granted") === "granted",
           click: function () {
             toggleNotificationInMainWindow(this.checked);
           },
@@ -235,12 +245,6 @@ const VERSION = "1.0";
 
   // Toggle main window visibility
   function toggleMainWindow() {
-    if (!mainWindow) {
-      // If main window doesn't exist, create it
-      openMainWindow();
-      return;
-    }
-
     try {
       // Check if window is currently visible
       if (
@@ -376,9 +380,6 @@ const VERSION = "1.0";
     }
   }
 
-  // Update notification menu item label (called from inject.js)
-  function updateNotificationMenuItemLabel(state) {}
-
   // Quit application
   function quitApplication() {
     isQuitting = true;
@@ -429,50 +430,6 @@ const VERSION = "1.0";
     });
 
     nw.global.localStorage = localStorage;
-
-    // Set up global function for inject.js to call when notification state changes
-    nw.global.updateNotificationMenuItem = updateNotificationMenuItemLabel;
-
-    // Handle reopen event (when user clicks dock/taskbar icon while app is running)
-    nw.App.onOpen.addListener(function () {
-      console.log("[Main] App open event triggered");
-
-      // If main window exists and is hidden, show it
-      if (mainWindow) {
-        try {
-          // Check if window is hidden or minimized
-          if (
-            !mainWindow.window ||
-            mainWindow.window.document.visibilityState !== "visible"
-          ) {
-            // Window is hidden, show and focus it
-            mainWindow.show();
-            mainWindow.focus();
-            console.log(
-              "[Main] Main window shown and focused due to open event"
-            );
-          } else {
-            // Window is already visible, just focus it
-            mainWindow.focus();
-            console.log("[Main] Main window focused due to open event");
-          }
-        } catch (error) {
-          // Fallback: just show and focus the window
-          console.log(
-            "[Main] Error checking window state on open, showing window:",
-            error
-          );
-          mainWindow.show();
-          mainWindow.focus();
-        }
-      } else {
-        // If main window doesn't exist, create it
-        console.log(
-          "[Main] Main window doesn't exist on open, creating new window"
-        );
-        openMainWindow();
-      }
-    });
   }
 
   initialize();

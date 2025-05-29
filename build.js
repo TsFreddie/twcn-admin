@@ -118,7 +118,7 @@ async function installDependencies() {
     try {
       // Change to source directory and install dependencies
       process.chdir(CONFIG.srcDir);
-      execSync("npm install --production", { stdio: "inherit" });
+      execSync("npm install --omit=dev", { stdio: "inherit" });
       process.chdir("..");
       log("Dependencies installed successfully ✓");
     } catch (error) {
@@ -326,9 +326,4 @@ process.on("unhandledRejection", (reason, promise) => {
   process.exit(1);
 });
 
-// Run the build if this script is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
-
-export { main, CONFIG };
+main();

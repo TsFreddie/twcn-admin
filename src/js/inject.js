@@ -179,6 +179,25 @@
     exposeLogoutFunction();
     exposeNotificationControl();
 
+    // Handle reopen event (when user clicks dock/taskbar icon while app is running)
+    function onAppOpen() {
+      const mainWindow = nw.Window.get();
+      if (mainWindow) {
+        // Show the main window if it exists
+        mainWindow.show();
+        mainWindow.focus();
+        console.log("[Main] Main window shown on reopen");
+      }
+    }
+
+    nw.App.onOpen.addListener(onAppOpen);
+
+    // Remove listener on unload
+    window.addEventListener("unload", function () {
+      console.log("[Inject] Unloading page functionality, removing listeners");
+      nw.App.onOpen.removeListener(onAppOpen);
+    });
+
     console.log("[Inject] Page functionality initialized successfully");
   }
 
