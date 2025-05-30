@@ -179,11 +179,19 @@ EOF
             # Create systemd user service for auto-start
             systemd.user.services.twcn-admin = mkIf (cfg.autoStart && cfg.users != [ ]) {
               description = "TeeworldsCN Admin";
-              wantedBy = [ "graphical-session.target" ];
-              after = [ "graphical-session.target" ];
+              wantedBy = [ "default.target" ];
+              after = [ "graphical-session.target" "xdg-desktop-portal.service" ];
+              wants = [ "graphical-session.target" ];
               serviceConfig = {
                 Type = "simple";
                 ExecStart = "${cfg.package}/bin/twcn-admin";
+                # Add a delay to ensure desktop environment is fully ready
+                ExecStartPre = "${pkgs.coreutils}/bin/sleep 3";
+                # Set environment variables for proper desktop integration
+                Environment = [
+                  "DISPLAY=:0"
+                  "XDG_RUNTIME_DIR=%i"
+                ];
               };
             };
           };
@@ -219,15 +227,22 @@ EOF
             systemd.user.services.twcn-admin = mkIf cfg.autoStart {
               Unit = {
                 Description = "TeeworldsCN Admin";
-                After = [ "graphical-session.target" ];
+                After = [ "graphical-session.target" "xdg-desktop-portal.service" ];
+                Wants = [ "graphical-session.target" ];
               };
               Service = {
                 Type = "simple";
                 ExecStart = "${cfg.package}/bin/twcn-admin";
+                # Add a delay to ensure desktop environment is fully ready
+                ExecStartPre = "${pkgs.coreutils}/bin/sleep 3";
                 Restart = "no";
+                # Set environment variables for proper desktop integration
+                Environment = [
+                  "DISPLAY=:0"
+                ];
               };
               Install = {
-                WantedBy = [ "graphical-session.target" ];
+                WantedBy = [ "default.target" ];
               };
             };
           };
