@@ -192,6 +192,49 @@ EOF
           };
         };
 
+      # Home Manager module for per-user configuration
+      homeManagerModules.default = { config, lib, pkgs, ... }:
+        with lib;
+        let
+          cfg = config.programs.twcn-admin;
+        in
+        {
+          options.programs.twcn-admin = {
+            enable = mkEnableOption "TeeworldsCN Admin application";
+
+            package = mkOption {
+              type = types.package;
+              default = self.packages.${pkgs.system}.default;
+              description = "The TeeworldsCN Admin package to use";
+            };
+
+            autoStart = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Whether to automatically start TeeworldsCN Admin on login";
+            };
+          };
+
+          config = mkIf cfg.enable {
+            home.packages = [ cfg.package ];
+
+            # Create systemd user service for auto-start
+            systemd.user.services.twcn-admin = mkIf cfg.autoStart {
+              Unit = {
+                Description = "TeeworldsCN Admin";
+                After = [ "graphical-session.target" ];
+              };
+              Service = {
+                Type = "simple";
+                ExecStart = "${cfg.package}/bin/twcn-admin";
+              };
+              Install = {
+                WantedBy = [ "graphical-session.target" ];
+              };
+            };
+          };
+        };
+
       # Development shell for building the application
       devShells = forAllSystems (system:
         let
