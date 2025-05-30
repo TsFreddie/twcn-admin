@@ -176,7 +176,7 @@ EOF
           config = mkIf cfg.enable {
             environment.systemPackages = [ cfg.package ];
 
-            # Create desktop autostart entries for specified users
+            # Create systemd user service for auto-start
             systemd.user.services.twcn-admin = mkIf (cfg.autoStart && cfg.users != [ ]) {
               description = "TeeworldsCN Admin";
               wantedBy = [ "graphical-session.target" ];
@@ -186,9 +186,6 @@ EOF
                 ExecStart = "${cfg.package}/bin/twcn-admin";
               };
             };
-
-            # Enable the service for specified users
-            systemd.user.services.twcn-admin.enable = mkIf (cfg.autoStart && cfg.users != [ ]) true;
           };
         };
 
