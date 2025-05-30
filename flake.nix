@@ -217,14 +217,18 @@ EOF
 
             # Create systemd user service for auto-start
             systemd.user.services.twcn-admin = mkIf cfg.autoStart {
-              description = "TeeworldsCN Admin";
-              after = [ "graphical-session.target" ];
-              serviceConfig = {
+              Unit = {
+                Description = "TeeworldsCN Admin";
+                After = [ "graphical-session.target" ];
+              };
+              Service = {
                 Type = "simple";
                 ExecStart = "${cfg.package}/bin/twcn-admin";
                 Restart = "no";
               };
-              wantedBy = [ "graphical-session.target" ];
+              Install = {
+                WantedBy = [ "graphical-session.target" ];
+              };
             };
           };
         };
