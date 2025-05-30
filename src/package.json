@@ -3,7 +3,7 @@
   "name": "twcn-admin",
   "product_string": "TeeworldsCN 管理系统",
   "chromium-args": "--disable-web-security --ozone-platform-hint=auto --enable-wayland-ime",
-  "version": "1.0",
+  "version": "1.0.0",
   "node-remote": [
     "http://localhost:5173",
     "https://teeworlds.cn"

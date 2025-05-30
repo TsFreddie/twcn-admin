@@ -15,6 +15,14 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Read version from main.js
+const mainJsContent = fs.readFileSync(
+  path.join(__dirname, "src/js/main.js"),
+  "utf8"
+);
+const versionMatch = mainJsContent.match(/const VERSION = ["'](.+?)["'];/);
+const VERSION = versionMatch ? versionMatch[1] : "X.X";
+
 // Configuration
 const CONFIG = {
   // Source directory containing the NW.js app
@@ -40,7 +48,7 @@ const CONFIG = {
 
   // Application metadata
   appName: "TeeworldsCN-Admin",
-  appVersion: "1.0.0",
+  appVersion: VERSION,
 };
 
 /**
@@ -58,6 +66,8 @@ function log(message, type = "info") {
 
   console.log(`${prefix} [${timestamp}] ${message}`);
 }
+
+log(`Building TeeworldsCN Admin v${VERSION}...`);
 
 function ensureDirectoryExists(dirPath) {
   if (!fs.existsSync(dirPath)) {

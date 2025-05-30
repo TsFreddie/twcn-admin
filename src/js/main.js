@@ -4,7 +4,7 @@
 const { env } = require("process");
 const AutoLaunch = require("auto-launch");
 
-const VERSION = "1.0";
+const VERSION = "1.1";
 
 (function () {
   "use strict";
@@ -23,6 +23,7 @@ const VERSION = "1.0";
       icon: "./icon.png",
       show: false,
       focus: false,
+      id: "twcn-admin",
     },
   };
 
@@ -101,28 +102,31 @@ const VERSION = "1.0";
           label: "弹窗通知",
           type: "checkbox",
           checked:
-            localStorage.getItem("allowNotification", "granted") === "granted",
+            (localStorage.getItem("allowNotification") || "granted") ===
+            "granted",
           click: function () {
             toggleNotificationInMainWindow(this.checked);
           },
         })
       );
 
-      // Auto-start toggle menu item
-      const autoStartMenuItem = new nw.MenuItem({
-        label: "开机自启",
-        type: "checkbox",
-        checked: false, // Will be updated after initialization
-        click: function () {
-          toggleAutoStart(this);
-        },
-      });
-      menu.append(autoStartMenuItem);
+      // Auto-start toggle menu item (only show if auto-launch is available)
+      if (typeof autoLauncher.isStub !== "function" || !autoLauncher.isStub()) {
+        const autoStartMenuItem = new nw.MenuItem({
+          label: "开机自启",
+          type: "checkbox",
+          checked: false, // Will be updated after initialization
+          click: function () {
+            toggleAutoStart(this);
+          },
+        });
+        menu.append(autoStartMenuItem);
 
-      // Initialize auto-start menu item state
-      isAutoStartEnabled().then((enabled) => {
-        autoStartMenuItem.checked = enabled;
-      });
+        // Initialize auto-start menu item state
+        isAutoStartEnabled().then((enabled) => {
+          autoStartMenuItem.checked = enabled;
+        });
+      }
 
       // Start minimized toggle menu item
       const startMinimizedMenuItem = new nw.MenuItem({
