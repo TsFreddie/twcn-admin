@@ -28,26 +28,39 @@ const VERSION = "1.1";
   };
 
   try {
-    if (chrome.declarativeWebRequest) {
-      const match = new chrome.declarativeWebRequest.RequestMatcher({
-        url: { hostSuffix: "", schemes: ["http"] },
-        stages: ["onBeforeSendHeaders"],
-      });
-
-      const action = new chrome.declarativeWebRequest.SetRequestHeader({
-        name: "origin",
-        value: new URL(APP_CONFIG.remoteUrl).origin,
-      });
-
-      chrome.declarativeWebRequest.onRequest.addRules([
-        {
-          priority: 1000,
-          conditions: [match],
-          actions: [action],
+    if (chrome.declarativeNetRequest) {
+      // Create a rule to modify headers for all HTTP requests
+      const rule = {
+        id: 1000,
+        priority: 1,
+        action: {
+          type: "modifyHeaders",
+          requestHeaders: [
+            {
+              header: "origin",
+              operation: "set",
+              value: new URL(APP_CONFIG.remoteUrl).origin,
+            },
+          ],
         },
-      ]);
+        condition: {
+          urlFilter: "*",
+          resourceTypes: ["xmlhttprequest", "main_frame", "sub_frame"],
+        },
+      };
+
+      // Update dynamic rules
+      chrome.declarativeNetRequest.updateDynamicRules(
+        {
+          removeRuleIds: [rule.id], // Remove any existing rule with this ID
+          addRules: [rule],
+        },
+        () => {
+          console.log("[Main] Request header modification rule set successfully");
+        }
+      );
     } else {
-      console.warn("[Main] declarativeWebRequest API is not available.");
+      console.warn("[Main] declarativeNetRequest API is not available.");
     }
   } catch (error) {
     console.error("[Main] Error setting up request header override:", error);
@@ -134,7 +147,7 @@ const VERSION = "1.1";
         type: "checkbox",
         checked: getStartMinimizedSetting(),
         click: function () {
-          setStartMinimizedSetting(this.check);
+          setStartMinimizedSetting(this.checked);
         },
       });
       menu.append(startMinimizedMenuItem);
@@ -379,7 +392,7 @@ const VERSION = "1.1";
   // Start minimized related functions
   function getStartMinimizedSetting() {
     try {
-      return localStorage.getItem("startMinimized");
+      return localStorage.getItem("startMinimized") === "true";
     } catch (error) {
       console.error("[Main] Failed to get start minimized setting:", error);
       return false;
@@ -388,7 +401,7 @@ const VERSION = "1.1";
 
   function setStartMinimizedSetting(enabled) {
     try {
-      localStorage.setItem("startMinimized", enabled);
+      localStorage.setItem("startMinimized", enabled.toString());
       console.log("[Main] Start minimized setting updated:", enabled);
       return true;
     } catch (error) {
@@ -446,7 +459,7 @@ const VERSION = "1.1";
       }
     });
 
-    nw.global.localStorage = localStorage;
+    nw.global.nwLocalStorage = localStorage;
   }
 
   initialize();

@@ -42,7 +42,7 @@
   function exposeNotificationControl() {
     let notificationCallback;
     const notificationState = {
-      state: nw.global.localStorage.getItem("allowNotification") || "granted",
+      state: nw.global.nwLocalStorage.getItem("allowNotification") || "granted",
       addEventListener(type, listener) {
         if (type === "change") {
           console.log("Notification listener added");
@@ -82,7 +82,7 @@
     const toggleNotification = function (checked) {
       notificationState.state = checked ? "granted" : "denied";
 
-      nw.global.localStorage.setItem(
+      nw.global.nwLocalStorage.setItem(
         "allowNotification",
         notificationState.state.toString()
       );
