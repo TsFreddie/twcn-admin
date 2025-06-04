@@ -4,7 +4,7 @@
 const { env } = require("process");
 const AutoLaunch = require("auto-launch");
 
-const VERSION = "1.1";
+const VERSION = "1.2";
 
 (function () {
   "use strict";
