@@ -156,7 +156,15 @@
           bottom: 0 !important;
         }
         #ticket-panel > button {
+          right: 0.25rem !important;
           top: 0.25rem !important;
+          position: fixed !important;
+        }
+        @media (min-width: 640px) {
+          #ticket-panel > button {
+            right: 0.75rem !important;
+            top: 0.50rem !important;
+          }
         }
         #welcome-screen {
           display: none !important;
