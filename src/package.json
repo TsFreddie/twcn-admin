@@ -18,7 +18,8 @@
     "icon": "./icon.png"
   },
   "permissions": [
-    "declarativeWebRequest"
+    "declarativeWebRequest",
+    "*://*/*"
   ],
   "inject_js_start": "./js/inject.js",
   "dependencies": {
