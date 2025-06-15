@@ -35,7 +35,7 @@ const CONFIG = {
   cacheDir: "./cache",
 
   // NW.js version to use
-  version: "0.100.0",
+  version: "0.100.1",
 
   // Platforms to build for
   platforms: ["linux-x64", "win-x64"],

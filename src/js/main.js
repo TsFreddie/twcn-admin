@@ -4,7 +4,7 @@
 const { env } = require("process");
 const AutoLaunch = require("auto-launch");
 
-const VERSION = "1.2";
+const VERSION = "1.3";
 
 (function () {
   "use strict";
@@ -56,7 +56,9 @@ const VERSION = "1.2";
           addRules: [rule],
         },
         () => {
-          console.log("[Main] Request header modification rule set successfully");
+          console.log(
+            "[Main] Request header modification rule set successfully"
+          );
         }
       );
     } else {
@@ -274,6 +276,13 @@ const VERSION = "1.2";
     // Handle window blur
     win.on("blur", function () {
       console.log("[Main] Main window blurred");
+    });
+
+    // Handle new window
+    win.on("new-win-policy", function (frame, url, policy) {
+      console.log("[Main] New window policy triggered for URL:", url);
+      policy.ignore();
+      nw.Shell.openExternal(url);
     });
   }
 
